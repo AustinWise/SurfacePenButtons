@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -36,6 +37,29 @@ namespace WindowsFormsApplication2
                 mCommandMap[(int)f.GetValue(null)] = f.Name;
             }
 
+            getCustomMessage("System.Windows.Forms.Control", "WM_GETCONTROLNAME", null);
+            getCustomMessage("System.Windows.Forms.Control", "WM_GETCONTROLTYPE", null);
+            getCustomMessage("System.Windows.Forms.Control", "mouseWheelMessage", null);
+            getCustomMessage("System.Windows.Forms.NativeMethods", "wmMouseEnterMessage", null);
+            getCustomMessage("System.Windows.Forms.NativeMethods", "wmUnSubclass", null);
+
+            addCustomMessage(0x0249, "WM_POINTERENTER");
+            addCustomMessage(0x024A, "WM_POINTERLEAVE");
+        }
+
+        void getCustomMessage(string className, string fieldName, object instance)
+        {
+            var t = typeof(Control).Assembly.GetType(className, true);
+            var f = t.GetField(fieldName, (instance == null ? BindingFlags.Static : BindingFlags.Default) | BindingFlags.NonPublic);
+            int val = (int)f.GetValue(instance);
+            if (val <= 0)
+                return;
+            mCommandMap[val] = fieldName + "^";
+        }
+
+        void addCustomMessage(int msg, string name)
+        {
+            mCommandMap.Add(msg, name + "#");
         }
 
         protected override void WndProc(ref Message m)

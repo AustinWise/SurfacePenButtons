@@ -24,6 +24,7 @@ namespace WindowsFormsApplication2
         const int WM_MOUSEMOVE = 0x0200;
         const int WM_NCHITTEST = 0x0084;
         const int WM_SETCURSOR = 0x0020;
+        const int WM_POINTERUPDATE = 0x0245;
 
         Dictionary<int, string> mCommandMap = new Dictionary<int, string>();
 
@@ -39,12 +40,19 @@ namespace WindowsFormsApplication2
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg != WM_MOUSEMOVE && m.Msg != WM_NCHITTEST && m.Msg != WM_SETCURSOR)
+            switch (m.Msg)
             {
-                string name;
-                if (!mCommandMap.TryGetValue(m.Msg, out name))
-                    name = $"0x{m.Msg:x}";
-                Console.WriteLine($"{DateTime.Now}: {name}");
+                case WM_MOUSEMOVE:
+                case WM_NCHITTEST:
+                case WM_SETCURSOR:
+                case WM_POINTERUPDATE:
+                    break;
+                default:
+                    string name;
+                    if (!mCommandMap.TryGetValue(m.Msg, out name))
+                        name = $"0x{m.Msg:x}";
+                    Console.WriteLine($"{DateTime.Now}: {name}");
+                    break;
             }
             base.WndProc(ref m);
         }
